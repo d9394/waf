@@ -1,6 +1,22 @@
 \.(htaccess|bash_history)
 \.(bak|inc|old|mdb|sql|backup|java|class|tgz|gz|tar|zip)$
-(phpmyadmin|jmx-console|admin-console|jmxinvokerservlet)
+(phpmyadmin|jmx-console|admin-console|jmxinvokerservlet|dnslog|jndi\:ldap|jndi:rmi|jndi\:)
 java\.lang
 \.svn\/
-/(attachments|upimg|images|css|uploadfiles|html|uploads|templets|static|template|data|inc|forumdata|upload|includes|cache|avatar)/(\\w+).(php|jsp)
+\/see\/view\/uploadImage\.json
+window\.open\(
+(alert|eval|prompt|confirm|onesettimeout|onerror)\s*\(
+#['"\\(\\)]
+<script|script>
+javascript\:
+on(load|click|mouseover|error)\s*=
+# 拦截 Windows 盘符尝试 (如 c:/, d:/)
+[a-zA-Z]:[\\/]
+# 拦截 Windows 特有敏感路径
+(documents\s+and\s+settings|boot\.ini|windows\\system32|win\.ini)
+# 拦截 Linux 敏感路径 (如 /etc/passwd)
+/etc/(passwd|shadow|group|hosts)
+# 拦截路径遍历通用特征
+\.\./\.\./
+sitemap\.xml
+
