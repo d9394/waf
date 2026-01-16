@@ -20,3 +20,15 @@ java\.lang
 \$_(GET|post|cookie|files|session|env|phplib|GLOBALS|SERVER)\[
 \<(iframe|script|body|img|layer|div|meta|style|base|object|input)
 (onmouseover|onerror|onload)\=
+# 拦截报错注入关键函数
+\b(xmltype|updatexml|extractvalue|dbms_pipe|dbms_lock)\b
+# 拦截逻辑注入 (OR/AND 数字等于数字)
+\b(or|and)\b\s+\d+\s*=\s*[\(\d]
+# 拦截字符拼接函数 (针对 CHR(xxx))
+\bchr\s*\(
+# 拦截子查询常见结构
+\(\s*select\b
+# 拦截更广泛的 select 结构 (不一定非要有 from)
+\bselect\b.*\b(upper|lower|count|max|min)\b
+# 拦截二次编码可能的残余 (可选)
+%27|%22
