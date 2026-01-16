@@ -38,7 +38,7 @@ config_output_html=[[
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Language" content="zh-cn" />
 <meta http-equiv="Refresh" content="0;url=https://www.test.net" />
-<title>hellocq｜Web应用防火墙</title>
+<title>test｜Web应用防火墙</title>
 </head>
 <body>
 <h1 align="center"> bye
