@@ -266,25 +266,35 @@ end
 -- deny referer
 function referer_attack_check()
     if config_referer_check == "on" then
-        local REFERER_RULES = get_rule('referer.rule')
-        -- 获取 referer，并处理可能的空值
         local USER_REFERER = ngx.var.http_referer
-        local URI = ngx.var.uri -- 匹配路径部分
+        local USER_AGENT = ngx.var.http_user_agent
+        local REFERER_RULES = get_rule('referer.rule')
+        local RAW_URI = ngx.var.request_uri
+        local REWRITTEN_URI = ngx.var.uri
 
-        -- 判断条件：Referer 不存在 (nil) 或者 明确为 "-"
-        if USER_REFERER == nil or USER_REFERER == "-" or USER_REFERER == "" then
-            -- ngx.log(ngx.ERR, "WAF_TRACE: URI is [", URI, "], Referer is [", USER_REFERER, "]")
-            for _, rule in pairs(REFERER_RULES) do
-                if rule ~= "" and rulematch(URI, rule, "jo") then
-                    -- 命中后记录并退出
-                    log_record('Deny_Referer', ngx.var.request_uri, "-", rule)
-                    if config_waf_enable == "on" then
-                        ngx.exit(444)
-                        return true
-                    end
+        -- 只要有 Referer，说明是正常跳转，直接放行
+        if USER_REFERER ~= nil and USER_REFERER ~= "-" and USER_REFERER ~= "" then
+            return false
+        end
+
+        -- 如果没有 Referer，先排除已知的搜索引擎爬虫 UA (白名单)
+        local spider_white = "(Baiduspider|Googlebot|bingbot|Sogou|Yisou|SemrushBot|DotBot)"
+        if USER_AGENT and ngx.re.find(USER_AGENT, spider_white, "jio") then
+            return false
+        end
+
+        -- 只有在【没有 Referer】且【不是已知搜索引擎】的情况下，才匹配路径拦截规则
+        for _, rule in pairs(REFERER_RULES) do
+            if (rule ~= "" and rulematch(RAW_URI, rule, "jo") or rulematch(REWRITTEN_URI, rule, "jo")) then
+                -- 记录并采用 444 丢弃，但因为标记了 Deny_Referer，不会触发 error.log 里的蜜罐封禁
+                log_record('Deny_Referer', ngx.var.request_uri, "-", rule)
+                if config_waf_enable == "on" then
+                    ngx.exit(444)
+                    return true
                 end
             end
         end
     end
     return false
 end
+
